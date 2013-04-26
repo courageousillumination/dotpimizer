@@ -9,4 +9,8 @@ if len(sys.argv) < 2:
 
 
 if __name__ == '__main__':
-    print('WOAH! THIS IS A STUB! WOAH! WOAH!'file=sys.stdout)
+    import regexgraph, graphopt
+    g = regexgraph.regex_to_graph(sys.argv[1])
+    g.write_png('init.png')
+    g2 = graphopt.graph_optimize(g)
+    g2.write_png('final.png')
