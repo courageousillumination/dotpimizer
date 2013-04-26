@@ -11,6 +11,6 @@ if len(sys.argv) < 2:
 if __name__ == '__main__':
     import regexgraph, graphopt
     g = regexgraph.regex_to_graph(sys.argv[1])
-    g.write_png('init.png')
+    g.write('init.dot')
     g2 = graphopt.graph_optimize(g)
-    g2.write_png('final.png')
+    g2.write('final.dot')
