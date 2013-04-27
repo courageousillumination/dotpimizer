@@ -61,6 +61,8 @@ class StarToken(Token):
         graph.add_edge(pydot.Edge(str(state-1), str(parent), label="epsilon"))
         graph.add_edge(pydot.Edge(str(state-1), str(state), label="epsilon"))
         
+        return state
+        
 class PlusToken(Token):
     def __init__(self, token):
         self.token = token
@@ -74,6 +76,8 @@ class PlusToken(Token):
         
         graph.add_edge(pydot.Edge(str(state-1), str(parent), label="epsilon"))
         graph.add_edge(pydot.Edge(str(state-1), str(state), label="epsilon"))
+        
+        return state
         
 def tokenize(regex):
     #If this is an operator just return
@@ -132,7 +136,7 @@ def tokenize(regex):
                     tokens[index - 1] = PlusToken(tokens[index - 1])
             #Remove all the stars that are left
             tokens = [x for x in tokens if x != "*" and x != "+"]
-        
+            print tokens
         
             #Then we can apply ors
             if "|" in tokens:
