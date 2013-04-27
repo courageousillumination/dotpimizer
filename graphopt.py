@@ -19,22 +19,27 @@ def mk_simplegraph(g):
             newn.successors.add((e.get_label(),newm))
     return (s,node_map)
 
-def merge_epsilons(graph):
+def mk_dotgraph(s):
+    g = pydot.Dot(graph_type='digraph')
+    #stub
+    return g
+
+def merge_epsilons(s):
     from regexgraph import epsilon as e
     removed_nodes = set()
-    for n in graph.nodes:
+    for n in s.nodes:
         if n in removed_nodes: continue
-        for m in graph.nodes:
+        for m in s.nodes:
             if n in removed_nodes or m in removed_nodes: continue
             if (e,n) in m.successors and (e,m) in n.successors:
                 n.successors.update(m.successors)
-                n.successors.discard(m)
+                n.successors.discard((e,m))
                 if m in m.successors:
-                    n.successors.add(n)
+                    n.successors.add((e,n))
                 removed_nodes.add(m)
                 if n.name == '0' or m.name == '0':
                     n.name = '0'
-    graph.nodes.difference_update(removed_nodes)
+    s.nodes.difference_update(removed_nodes)
 
 def graph_optimize(graph):
     s,nodemap = mk_simplegraph(graph)
