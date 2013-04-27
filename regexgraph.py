@@ -61,9 +61,23 @@ class StarToken(Token):
         graph.add_edge(pydot.Edge(str(state-1), str(parent), label="epsilon"))
         graph.add_edge(pydot.Edge(str(state-1), str(state), label="epsilon"))
         
+class PlusToken(Token):
+    def __init__(self, token):
+        self.token = token
+        
+    def add_to_graph(self, graph, state, parent = None):
+        print parent
+        state = self.token.add_to_graph(graph, state, parent)
+        #Add the end node
+        state += 1
+        graph.add_node(pydot.Node(str(state)))
+        
+        graph.add_edge(pydot.Edge(str(state-1), str(parent), label="epsilon"))
+        graph.add_edge(pydot.Edge(str(state-1), str(state), label="epsilon"))
+        
 def tokenize(regex):
     #If this is an operator just return
-    if regex == "|" or regex == "*":
+    if regex == "|" or regex == "*" or regex == "+":
         return regex
     if True:
         #First, loop over and break into outer most parenthesis
@@ -87,7 +101,7 @@ def tokenize(regex):
                 else:
                     paren_string += char
             #Get or in the outmost layer
-            elif (char == "|" or char == "*") and paren_counter == 0:
+            elif (char == "|" or char == "*" or char == "+") and paren_counter == 0:
                 if(paren_string != ""):
                     broken.append(paren_string)
                 broken.append(char)  
@@ -110,12 +124,14 @@ def tokenize(regex):
             print broken
             tokens =  [tokenize(x) for x in broken]
             
-            #Apply the stars
+            #Apply the stars and +
             for index, token in enumerate(tokens):
                 if token == "*":
                     tokens[index - 1] = StarToken(tokens[index - 1])
+                elif token == "+":
+                    tokens[index - 1] = PlusToken(tokens[index - 1])
             #Remove all the stars that are left
-            tokens = [x for x in tokens if x != "*"]
+            tokens = [x for x in tokens if x != "*" and x != "+"]
         
         
             #Then we can apply ors
