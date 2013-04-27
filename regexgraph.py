@@ -45,13 +45,27 @@ class RegexToken(Token):
         for token in self.tokens:
             state = token.add_to_graph(graph, state, parent)
             parent = str(state)
-          
-        return state          
+        return state 
+class StarToken(Token):
+    def __init__(self, token):
+        self.token = token
+        
+    def add_to_graph(self, graph, state, parent = None):
+        print parent
+        state = self.token.add_to_graph(graph, state, parent)
+        #Add the end node
+        state += 1
+        graph.add_node(pydot.Node(str(state)))
+        
+        graph.add_edge(pydot.Edge(str(parent), str(state-1), label="epsilon"))
+        graph.add_edge(pydot.Edge(str(state-1), str(parent), label="epsilon"))
+        graph.add_edge(pydot.Edge(str(state-1), str(state), label="epsilon"))
+        
 def tokenize(regex):
     #If this is an operator just return
-    if regex == "|":
+    if regex == "|" or regex == "*":
         return regex
-    if "(" in regex:
+    if True:
         #First, loop over and break into outer most parenthesis
         paren_counter = 0
         broken = []
@@ -73,8 +87,9 @@ def tokenize(regex):
                 else:
                     paren_string += char
             #Get or in the outmost layer
-            elif char == "|" and paren_counter == 0:
-                broken.append(paren_string)
+            elif (char == "|" or char == "*") and paren_counter == 0:
+                if(paren_string != ""):
+                    broken.append(paren_string)
                 broken.append(char)  
                 paren_string = ""
             else:
@@ -82,24 +97,31 @@ def tokenize(regex):
             
         if paren_string != "":
             broken.append(paren_string)
-        tokens =  [tokenize(x) for x in broken]
-        #Then we can apply ors
-        if "|" in tokens:
-            tokens = [OrOp([x for x in tokens if x != "|"])]
-        return RegexToken(tokens)
-    else:
-        #In this case we have a pretty simple regex
-        #Split on or cause that binds hella loose
-        or_split = regex.split('|')
-        if len(or_split) != 1:
-            result = OrOp([tokenize(x) for x in or_split])
-        #Otherwise actually tokenize
+        if len(broken) == 1:
+            or_split = regex.split('|')
+            if len(or_split) != 1:
+                result = OrOp([tokenize(x) for x in or_split])
+            else:
+                #Just deal with literal
+                result = LiteralExpression(regex)
+            return result
+            
         else:
-            #Just deal with literal
-            result = LiteralExpression(regex)
-        #In the case where there are no parentheisi we can deal with this eaiser    
-   
-    return result
+            print broken
+            tokens =  [tokenize(x) for x in broken]
+            
+            #Apply the stars
+            for index, token in enumerate(tokens):
+                if token == "*":
+                    tokens[index - 1] = StarToken(tokens[index - 1])
+            #Remove all the stars that are left
+            tokens = [x for x in tokens if x != "*"]
+        
+        
+            #Then we can apply ors
+            if "|" in tokens:
+                tokens = [OrOp([x for x in tokens if x != "|"])]
+            return RegexToken(tokens)
 
 def regex_to_graph(regex, graph_name = "regex_graph"):
     """
