@@ -12,7 +12,6 @@ class Graph(object):
     def tarjan(self):
         components = []
 
-        i = 0
         stack = []
         visited = set()
 
@@ -20,15 +19,15 @@ class Graph(object):
         lowlink = {}
 
         def strongconnect(node):
+            i = 0
+            if len(indices) > 0:
+                i = max(v for (k,v) in indices.items())+1
             indices[node] = i
             lowlink[node] = i
             visited.add(node)
             stack.append(node)
-            i += 1
 
             for l,m in node.neighbors:
-                if m == node: continue
-
                 if m not in visited:
                     strongconnect(m)
                     lowlink[node] = min(lowlink[node],lowlink[m])
