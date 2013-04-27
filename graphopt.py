@@ -21,7 +21,18 @@ def mk_simplegraph(g):
 
 def mk_dotgraph(s):
     g = pydot.Dot(graph_type='digraph')
-    #stub
+    nodemap = {}
+    for n in s.nodes:
+        newn = pydot.Node(n.name)
+        g.add(newn)
+        nodemap[n] = newn
+    for n in nodemap:
+        newn = nodemap[n]
+        edges = set()
+        for (l,m) in n.successors:
+            e = pydot.Edge(n.name,m.name)
+            e.set_label(l)
+            edges.add(e)
     return g
 
 def merge_epsilons(s):
