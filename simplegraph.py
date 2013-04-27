@@ -28,13 +28,13 @@ class Graph(object):
             i += 1
 
             for m in node.neighbors:
+                if m == node: continue
+
                 if m not in visited:
                     strongconnect(m)
                     lowlink[node] = min(lowlink[node],lowlink[m])
                 else if m in stack:
                     lowlink[node] = min(lowlink[node],indices[m])
-                else:
-                    pass
 
             if lowlink[node] == indices[node]:
                 component = set()
