@@ -5,7 +5,7 @@ def mk_simplegraph(g):
 
     node_map = {}
     for n in g.get_nodes():
-        newn = sg.Node()
+        newn = sg.Node(n.get_name())
         s.nodes.add(newn)
         node_map[newn] = n
     for newn in node_map:
@@ -16,7 +16,7 @@ def mk_simplegraph(g):
             m = e.get_destination()
             ms = [x for x in node_map if (node_map[x].get_name() == m)]
             newm = ms[0]
-            newn.neighbors.add((e.get_label(),newm))
+            newn.successors.add((e.get_label(),newm))
     return (s,node_map)
 
 def graph_optimize(graph):

@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 class Node(object):
-    def __init__(self):
+    def __init__(self,name):
         # A list of (label,node) pairs
-        self.neighbors = set()
+        self.successors = set()
+        self.name = name
 
 class Graph(object):
     def __init__(self):
@@ -13,7 +14,6 @@ class Graph(object):
         components = []
 
         stack = []
-
         indices = {}
         lowlink = {}
 
@@ -25,7 +25,7 @@ class Graph(object):
             lowlink[node] = i
             stack.append(node)
 
-            for l,m in node.neighbors:
+            for l,m in node.successors:
                 if m not in lowlink:
                     strongconnect(m)
                     lowlink[node] = min(lowlink[node],lowlink[m])
