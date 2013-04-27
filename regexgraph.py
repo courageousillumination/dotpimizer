@@ -6,8 +6,6 @@ class Token:
     def add_to_graph(self, graph):
         return None
 
-
-
 class OrOp(Token):
     def __init__(self, groups):
         self.groups = groups
@@ -18,7 +16,6 @@ class OrOp(Token):
         graph.add_node(pydot.Node(str(state)))
         graph.add_edge(pydot.Edge(str(parent), str(state), label="epsilon"))
         parent = state
-        print parent
         for group in self.groups:
             state = group.add_to_graph(graph, state, parent)
             end_nodes.append(state)
@@ -34,14 +31,10 @@ class LiteralExpression(Token):
         self.chars = chars
     
     def add_to_graph(self, graph, state, parent = None):
-        
-        #Add the link to the parent
-        for char in self.chars:
-            state+=1
-            graph.add_node(pydot.Node(str(state)))
-            graph.add_edge(pydot.Edge(str(parent), str(state), label=char))
-            parent = state
-            
+        state += 1
+        graph.add_node(pydot.Node(str(state)))
+        graph.add_edge(pydot.Edge(str(parent), str(state), label=self.chars))
+           
         return state
         
 class RegexToken(Token):
@@ -91,10 +84,8 @@ def tokenize(regex):
             broken.append(paren_string)
         tokens =  [tokenize(x) for x in broken]
         #Then we can apply ors
-        print tokens
         if "|" in tokens:
             tokens = [OrOp([x for x in tokens if x != "|"])]
-            print tokens
         return RegexToken(tokens)
     else:
         #In this case we have a pretty simple regex
@@ -107,44 +98,7 @@ def tokenize(regex):
             #Just deal with literal
             result = LiteralExpression(regex)
         #In the case where there are no parentheisi we can deal with this eaiser    
-    """if "(" in regex:
-        tokens = []
-        paren_counter = 0
-        paren_expression = ""
-        for char in regex:
-            if char == '(':
-                if paren_counter == 0:
-                    if paren_expression != "":
-                        tokens.append(tokenize(paren_expression))
-                        print paren_expression
-                        paren_expression = ""
-                else:
-                    paren_expression += char 
-                paren_counter += 1
-            elif char == ')':
-                paren_counter -= 1
-                if paren_counter == 0:
-                    tokens.append(tokenize(paren_expression))
-                    print paren_expression
-                    paren_expression = ""
-                else:
-                    paren_expression += char
-            else:
-                paren_expression += char
-        if paren_expression != "":
-            tokens.append(tokenize(paren_expression))
-        
-        result = RegexToken(tokens)
-    else:
-        #Otherwise we do some other stuff
-        #Split on or cause that binds hella loose
-        or_split = regex.split('|')
-        if len(or_split) != 1:
-            result = OrOp([tokenize(x) for x in or_split])
-        #Otherwise actually tokenize
-        else:
-            #Just deal with literal
-            result = LiteralExpression(regex)"""
+   
     return result
 
 def regex_to_graph(regex, graph_name = "regex_graph"):
