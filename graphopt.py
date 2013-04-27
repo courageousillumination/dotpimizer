@@ -19,6 +19,23 @@ def mk_simplegraph(g):
             newn.successors.add((e.get_label(),newm))
     return (s,node_map)
 
+def merge_epsilons(graph):
+    from regexgraph import epsilon as e
+    removed_nodes = set()
+    for n in graph.nodes:
+        if n in removed_nodes: continue
+        for m in graph.nodes:
+            if n in removed_nodes or m in removed_nodes: continue
+            if (e,n) in m.successors and (e,m) in n.successors:
+                n.successors.update(m.successors)
+                n.successors.discard(m)
+                if m in m.successors:
+                    n.successors.add(n)
+                removed_nodes.add(m)
+                if n.name == '0' or m.name == '0':
+                    n.name = '0'
+    graph.nodes.difference_update(removed_nodes)
+
 def graph_optimize(graph):
     s,nodemap = mk_simplegraph(graph)
     components = s.tarjan()
