@@ -106,7 +106,7 @@ def tokenize(regex):
                     paren_string = ""
                 else:
                     paren_string += char
-            #Get or in the outmost layer
+            #Get special chars in the outmost layer
             elif (char == "|" or char == "*" or char == "+") and paren_counter == 0:
                 if(paren_string != ""):
                     broken.append(paren_string)
@@ -127,17 +127,22 @@ def tokenize(regex):
             return result
             
         else:
-            print broken
             tokens =  [tokenize(x) for x in broken]
-            
-            #Apply the stars and +
+            #Apply the * and +
             for index, token in enumerate(tokens):
+                if isinstance(tokens[index - 1], LiteralExpression):
+                    previous_token = LiteralExpression(tokens[index - 1].chars[-1])
+                    tokens[index - 1].chars = tokens[index - 1].chars[:-1]
+                else:
+                    previous_token = tokens[index - 1]
+                    index = index - 1 
                 if token == "*":
-                    tokens[index - 1] = StarToken(tokens[index - 1])
+                    tokens[index] = StarToken(previous_token)
                 elif token == "+":
-                    tokens[index - 1] = PlusToken(tokens[index - 1])
+                    tokens[index] = PlusToken(previous_token)
             #Remove all the stars that are left
-            tokens = [x for x in tokens if x != "*" and x != "+"]
+            tokens = [x for x in tokens if x != "*" and x != "+" 
+                      and not (isinstance(x, LiteralExpression) and x.chars == "")]
             print tokens
         
             #Then we can apply ors
