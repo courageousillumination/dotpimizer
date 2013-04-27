@@ -6,6 +6,7 @@ def mk_simplegraph(g):
     node_map = {}
     for n in g.get_nodes():
         newn = sg.Node()
+        s.nodes.add(newn)
         node_map[newn] = n
     for newn in node_map:
         n = node_map[newn]
