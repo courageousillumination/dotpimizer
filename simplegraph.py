@@ -37,9 +37,9 @@ class Graph(object):
             if lowlink[node] == indices[node]:
                 component = set()
                 components.append(component)
-                while len(stack) > 0 and stack[-1] != node:
-                    m = stack.pop()
-                    component.add(m)
+                while stack[-1] != node:
+                    component.add(stack.pop())
+                component.add(node)
 
         for n in self.nodes:
             if n not in visited:
