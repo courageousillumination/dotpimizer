@@ -22,9 +22,11 @@ def mk_simplegraph(g):
 def graph_optimize(graph):
     s,nodemap = mk_simplegraph(graph)
     components = s.tarjan()
+    cluster_index = 0
     for c in components:
-        cur = pydot.Cluster()
+        cur = pydot.Cluster(str(cluster_index))
         for n in c:
             cur.add_node(nodemap[n])
         graph.add_subgraph(cur)
+        cluster_index += 1
     return graph
