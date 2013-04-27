@@ -1,5 +1,7 @@
 import pydot
 
+epsilon = '<&#949;>'
+
 class Token:
     def __init__(self):
         return None
@@ -14,7 +16,7 @@ class OrOp(Token):
         end_nodes = []
         state+=1
         graph.add_node(pydot.Node(str(state)))
-        graph.add_edge(pydot.Edge(str(parent), str(state), label="epsilon"))
+        graph.add_edge(pydot.Edge(str(parent), str(state), label=epsilon))
         parent = state
         for group in self.groups:
             state = group.add_to_graph(graph, state, parent)
@@ -23,7 +25,7 @@ class OrOp(Token):
         state+=1
         graph.add_node(pydot.Node(str(state)))
         for node in end_nodes:
-            graph.add_edge(pydot.Edge(str(node), str(state), label="epsilon"))
+            graph.add_edge(pydot.Edge(str(node), str(state), label=epsilon))
         return state
         
 class LiteralExpression(Token):
@@ -57,9 +59,9 @@ class StarToken(Token):
         state += 1
         graph.add_node(pydot.Node(str(state)))
         
-        graph.add_edge(pydot.Edge(str(parent), str(state-1), label="epsilon"))
-        graph.add_edge(pydot.Edge(str(state-1), str(parent), label="epsilon"))
-        graph.add_edge(pydot.Edge(str(state-1), str(state), label="epsilon"))
+        graph.add_edge(pydot.Edge(str(parent), str(state-1), label=epsilon))
+        graph.add_edge(pydot.Edge(str(state-1), str(parent), label=epsilon))
+        graph.add_edge(pydot.Edge(str(state-1), str(state), label=epsilon))
         
         return state
         
@@ -74,8 +76,8 @@ class PlusToken(Token):
         state += 1
         graph.add_node(pydot.Node(str(state)))
         
-        graph.add_edge(pydot.Edge(str(state-1), str(parent), label="epsilon"))
-        graph.add_edge(pydot.Edge(str(state-1), str(state), label="epsilon"))
+        graph.add_edge(pydot.Edge(str(state-1), str(parent), label=epsilon))
+        graph.add_edge(pydot.Edge(str(state-1), str(state), label=epsilon))
         
         return state
         
