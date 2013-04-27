@@ -13,7 +13,6 @@ class Graph(object):
         components = []
 
         stack = []
-        visited = set()
 
         indices = {}
         lowlink = {}
@@ -24,11 +23,10 @@ class Graph(object):
                 i = max(v for (k,v) in indices.items())+1
             indices[node] = i
             lowlink[node] = i
-            visited.add(node)
             stack.append(node)
 
             for l,m in node.neighbors:
-                if m not in visited:
+                if m not in lowlink:
                     strongconnect(m)
                     lowlink[node] = min(lowlink[node],lowlink[m])
                 elif m in stack:
@@ -36,13 +34,14 @@ class Graph(object):
 
             if lowlink[node] == indices[node]:
                 component = set()
+                while True:
+                    m = stack.pop()
+                    component.add(m)
+                    if m == node: break
                 components.append(component)
-                while stack[-1] != node:
-                    component.add(stack.pop())
-                component.add(node)
 
         for n in self.nodes:
-            if n not in visited:
+            if n not in lowlink:
                 strongconnect(n)
 
         return components
