@@ -1,2 +1,2 @@
 clean:
-	rm *.dot *.png *.ps *.pyc
+	rm -f *.dot *.png *.ps *.pyc
