@@ -10,12 +10,13 @@ def mk_simplegraph(g):
         node_map[newn] = n
     for newn in node_map:
         n = node_map[newn]
-        edges = g.get_edge(n,None)
+        edges = g.get_edges()
+        edges = [e for e in edges if e.get_source() == n.get_name()]
         for e in edges:
             m = e.get_destination()
-            ms = [x for x in node_map if (node_map[x] == m)]
+            ms = [x for x in node_map if (node_map[x].get_name() == m)]
             newm = ms[0]
-            newn.neighbors.add(e.get_label(),newm)
+            newn.neighbors.add((e.get_label(),newm))
     return (s,node_map)
 
 def graph_optimize(graph):
