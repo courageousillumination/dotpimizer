@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
 class Node(object):
-    def __init__(self,name):
+    def __init__(self):
         # A list of (label,node) pairs
-        self.neighbors = []
-        self.name = name
+        self.neighbors = set()
 
 class Graph(object):
     def __init__(self):
-        self.nodes = []
+        self.nodes = set()
 
     def tarjan(self):
         components = []
@@ -27,13 +26,13 @@ class Graph(object):
             stack.append(node)
             i += 1
 
-            for m in node.neighbors:
+            for l,m in node.neighbors:
                 if m == node: continue
 
                 if m not in visited:
                     strongconnect(m)
                     lowlink[node] = min(lowlink[node],lowlink[m])
-                else if m in stack:
+                elif m in stack:
                     lowlink[node] = min(lowlink[node],indices[m])
 
             if lowlink[node] == indices[node]:
