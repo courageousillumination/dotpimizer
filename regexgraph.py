@@ -85,70 +85,63 @@ def tokenize(regex):
     #If this is an operator just return
     if regex == "|" or regex == "*" or regex == "+":
         return regex
-    if True:
-        #First, loop over and break into outer most parenthesis
-        paren_counter = 0
-        broken = []
-        paren_string = ""
-        for char in regex:
-            if char == "(":
-                if paren_counter == 0:
-                    if paren_string != "":
-                        broken.append(paren_string)
-                    paren_string = ""
-                else:
-                    paren_string += char    
-                paren_counter += 1
-            elif char == ")":
-                paren_counter -= 1
-                if paren_counter == 0:
+    #First, loop over and break into outer most parenthesis
+    paren_counter = 0
+    broken = []
+    paren_string = ""
+    for char in regex:
+        if char == "(":
+            if paren_counter == 0:
+                if paren_string != "":
                     broken.append(paren_string)
-                    paren_string = ""
-                else:
-                    paren_string += char
-            #Get special chars in the outmost layer
-            elif (char == "|" or char == "*" or char == "+") and paren_counter == 0:
-                if(paren_string != ""):
-                    broken.append(paren_string)
-                broken.append(char)  
+                paren_string = ""
+            else:
+                paren_string += char    
+            paren_counter += 1
+        elif char == ")":
+            paren_counter -= 1
+            if paren_counter == 0:
+                broken.append(paren_string)
                 paren_string = ""
             else:
                 paren_string += char
-            
-        if paren_string != "":
-            broken.append(paren_string)
-        if len(broken) == 1:
-            or_split = regex.split('|')
-            if len(or_split) != 1:
-                result = OrOp([tokenize(x) for x in or_split])
-            else:
-                #Just deal with literal
-                result = LiteralExpression(regex)
-            return result
-            
+        #Get special chars in the outmost layer
+        elif (char == "|" or char == "*" or char == "+") and paren_counter == 0:
+            if(paren_string != ""):
+                broken.append(paren_string)
+            broken.append(char)  
+            paren_string = ""
         else:
-            tokens =  [tokenize(x) for x in broken]
-            #Apply the * and +
-            for index, token in enumerate(tokens):
-                if isinstance(tokens[index - 1], LiteralExpression):
-                    previous_token = LiteralExpression(tokens[index - 1].chars[-1])
-                    tokens[index - 1].chars = tokens[index - 1].chars[:-1]
-                else:
-                    previous_token = tokens[index - 1]
-                    index = index - 1 
-                if token == "*":
-                    tokens[index] = StarToken(previous_token)
-                elif token == "+":
-                    tokens[index] = PlusToken(previous_token)
-            #Remove all the stars that are left
-            tokens = [x for x in tokens if x != "*" and x != "+" 
-                      and not (isinstance(x, LiteralExpression) and x.chars == "")]
-            print tokens
-        
-            #Then we can apply ors
-            if "|" in tokens:
-                tokens = [OrOp([x for x in tokens if x != "|"])]
-            return RegexToken(tokens)
+            paren_string += char
+            
+    if paren_string != "":
+        broken.append(paren_string)
+    if len(broken) == 1:
+        or_split = regex.split('|')
+        if len(or_split) != 1:
+            result = OrOp([tokenize(x) for x in or_split])
+        else:
+            #Just deal with literal
+            result = LiteralExpression(regex)
+        return result
+            
+    else:
+        tokens =  [tokenize(x) for x in broken]
+        #Apply the * and +
+        for index, token in enumerate(tokens):
+            previous_token = tokens[index - 1]
+            index = index - 1 
+            if token == "*":
+                tokens[index] = StarToken(previous_token)
+            elif token == "+":
+                tokens[index] = PlusToken(previous_token)
+        #Remove all the stars that are left
+        tokens = [x for x in tokens if x != "*" and x != "+" 
+                  and not (isinstance(x, LiteralExpression) and x.chars == "")]
+        #Then we can apply ors
+        if "|" in tokens:
+            tokens = [OrOp([x for x in tokens if x != "|"])]
+        return RegexToken(tokens)
 
 def regex_to_graph(regex, graph_name = "regex_graph"):
     """
