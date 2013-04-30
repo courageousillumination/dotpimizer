@@ -30,12 +30,26 @@ class OrOp(Token):
         
 class LiteralExpression(Token):
     def __init__(self, chars):
-        self.chars = chars
-    
+        self.chars = []
+        character_set = False
+        for char in chars:
+            if char == '[':
+                character_set = True
+                temp = '['
+            elif char == ']':
+                character_set = False
+                temp += ']'
+                self.chars.append(temp)  
+            elif character_set == True:
+                temp += char
+            else:
+                self.chars.append(char)
+        
+
     def add_to_graph(self, graph, state, parent = None):
         state += 1
         graph.add_node(pydot.Node(str(state)))
-        graph.add_edge(pydot.Edge(str(parent), str(state), label=self.chars))
+        graph.add_edge(pydot.Edge(str(parent), str(state), label=''.join(self.chars)))
            
         return state
         
@@ -54,7 +68,7 @@ class StarToken(Token):
         self.token = token
         
     def add_to_graph(self, graph, state, parent = None):
-        print parent
+        
         state = self.token.add_to_graph(graph, state, parent)
         #Add the end node
         state += 1
@@ -137,14 +151,16 @@ def tokenize(regex):
             
     else:
         tokens =  [tokenize(x) for x in broken]
-        print tokens
+       
         #Apply the * and +
         for index, token in enumerate(tokens):
             #If it's a literal expression, just get the previous character
             if token == "*" or token == "+":
-                if isinstance(token, LiteralExpression):
-                    previous_token = LiteralExpression(token.chars[-1])
-                    token.chars = token.chars[:-1]
+                
+                if isinstance(tokens[index-1], LiteralExpression):
+                    previous_token = LiteralExpression(tokens[index-1].chars[-1])
+                    tokens[index-1].chars = tokens[index-1].chars[:-1]
+                   
                 else:
                     previous_token = tokens[index - 1]
                     index = index - 1 
