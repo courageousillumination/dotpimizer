@@ -159,11 +159,17 @@ def merge_single_path_nodes(s):
     return len(mark)
 
 def graph_optimize(graph):
+    reps = [graph]
     s = mk_simplegraph(graph)
     change = 1
     while change > 0:
         change = merge_epsilons(s)
-        change += merge_single_path_nodes(s)
+        if change > 0:
+            reps.append(mk_dotgraph(s))
+        tmp = merge_single_path_nodes(s)
+        if tmp > 0:
+            reps.append(mk_dotgraph(s))
+        change += tmp
 
     components = s.tarjan()
     g = mk_dotgraph(s)
@@ -171,7 +177,11 @@ def graph_optimize(graph):
     for c in components:
         cur = pydot.Cluster(str(cluster_index))
         for n in c:
-            cur.add_node(g.get_node(n.name))
+            newn = g.get_node(n.name)
+            if not newn:
+                print(n.name)
+            cur.add_node(newn)
         g.add_subgraph(cur)
         cluster_index += 1
-    return g
+    reps.append(g)
+    return reps

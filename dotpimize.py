@@ -11,6 +11,12 @@ if len(sys.argv) < 2:
 if __name__ == '__main__':
     import regexgraph, graphopt
     g = regexgraph.regex_to_graph(sys.argv[1])
-    g.write('init.dot')
-    g2 = graphopt.graph_optimize(g)
-    g2.write('final.dot')
+    reps = graphopt.graph_optimize(g)
+    i = 0
+    for graph in reps[:-1]:
+        if i == 0:
+            graph.write('init.dot')
+        else:
+            graph.write('mid'+str(i)+'.dot')
+        i += 1
+    reps[-1].write('final.dot')
