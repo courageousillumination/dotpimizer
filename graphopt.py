@@ -71,11 +71,11 @@ def graph_optimize(graph):
     components = s.tarjan()
     rename_sf(s)
     g = mk_dotgraph(s)
-#    cluster_index = 0
-#    for c in components:
-#        cur = pydot.Cluster(str(cluster_index))
-#        for n in c:
-#            cur.add_node(nodemap[n])
-#        graph.add_subgraph(cur)
-#        cluster_index += 1
+    cluster_index = 0
+    for c in components:
+        cur = pydot.Cluster(str(cluster_index))
+        for n in c:
+            cur.add_node(g.get_node(n.name))
+        g.add_subgraph(cur)
+        cluster_index += 1
     return g
