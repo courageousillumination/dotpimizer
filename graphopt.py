@@ -3,7 +3,8 @@ from regexgraph import epsilon
 
 startname = 's'
 terminalname = 't'
-specialnames = (startname,terminalname)
+s_and_t = 'st'
+specialnames = (startname,terminalname,s_and_t)
 
 def rename_sf(s):
     max_val = max(int(n.name) for n in s.nodes)
@@ -43,6 +44,8 @@ def mk_dotgraph(s):
             newn.set_label('Start')
         elif n.name == terminalname:
             newn.set_label('Terminal')
+        elif n.name == s_and_t:
+            newn.set_label('Start/Terminal')
         g.add_node(newn)
         nodemap[n] = newn
     for n in nodemap:
@@ -79,6 +82,12 @@ def merge_epsilons(s):
         for m in s.nodes:
             if n in rewrites or m in rewrites: continue
             if (e,n) in m.successors and (e,m) in n.successors:
+                if m.name in specialnames:
+                    if n.name in specialnames:
+                        n.name = s_and_t
+                    else:
+                        n.name = m.name
+
                 def swap_for_n(m2):
                     if m2 == m:
                         return n
@@ -100,8 +109,6 @@ def merge_epsilons(s):
                 for p in rewrites:
                     if rewrites[p] == m:
                         rewrites[p] = n
-                if m.name in specialnames:
-                    n.name = m.name
 
     for n in rewrites:
         for m in predecessor_map[n]:
@@ -137,17 +144,26 @@ def merge_single_path_nodes(s):
         for (l,m) in n.successors:
             if len(m.successors) == 1 and len(pred_map[m]) == 1:
                 (l2,m2) = m.successors.pop()
-                if (n == m2):
+                if n == m2:
                     m.successors.add((l2,n))
                 else:
                     mark.add(m)
                     new_edges.add((concat(l,l2),m2))
                     if m.name in specialnames:
-                        m2.name = m.name
-            elif m.name == terminalname and len(pred_map[m]) == 1 and l == epsilon:
+                        if m2 in specialnames:
+                            m2.name = s_and_t
+                        else:
+                            m2.name = m.name
+                    pred_map[m2].add(n)
+            elif m.name in specialnames and len(pred_map[m]) == 1 and l == epsilon:
                 mark.add(m)
-                n.name = terminalname
+                new_edges.add((l,n))
+                if n.name in specialnames:
+                    n.name = s_and_t
+                else:
+                    n.name = m.name
         n.successors.update(new_edges)
+        n.successors.discard((epsilon,n))
 
     for m in mark:
         preds = pred_map[m]
