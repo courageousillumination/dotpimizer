@@ -3,6 +3,14 @@ import pydot, simplegraph as sg
 startname = 's'
 terminalname = 't'
 
+def rename_sf(s):
+    max_val = max(int(n.name) for n in s.nodes)
+    for n in s.nodes:
+        if int(n.name) == 0:
+            n.name = startname
+        elif int(n.name) == max_val:
+            n.name = terminalname
+
 def mk_simplegraph(g):
     s = sg.Graph()
 
@@ -20,6 +28,8 @@ def mk_simplegraph(g):
             ms = [x for x in node_map if (node_map[x].get_name() == m)]
             newm = ms[0]
             newn.successors.add((e.get_label(),newm))
+
+    rename_sf(s)
     return s
 
 def mk_dotgraph(s):
