@@ -1,4 +1,5 @@
 import pydot, simplegraph as sg
+from regexgraph import epsilon
 
 startname = 's'
 terminalname = 't'
@@ -51,10 +52,7 @@ def mk_dotgraph(s):
             g.add_edge(e)
     return g
 
-def merge_epsilons(s):
-    from regexgraph import epsilon as e
-    specialnames = (startname,terminalname)
-
+def get_pred_map(s):
     predecessor_map = {}
     for n in s.nodes:
         for (l,m) in n.successors:
@@ -66,6 +64,14 @@ def merge_epsilons(s):
                 preds = set()
                 predecessor_map[m] = preds
             preds.add(n)
+
+    return predecessor_map
+
+def merge_epsilons(s):
+    e = epsilon
+    specialnames = (startname,terminalname)
+
+    predecessor_map = get_pred_map(s)
 
     rewrites = {}
 
