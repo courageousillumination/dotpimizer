@@ -125,18 +125,28 @@ def merge_single_path_nodes(s):
         s2 = ''
         if l1 != epsilon: s1 = l1
         if l2 != epsilon: s2 = l2
-        return s1+s2
+        out = s1+s2
+        if out == '':
+            out = epsilon
+        return out
 
     pred_map = get_pred_map(s)
     mark = set()
     for n in s.nodes:
         new_edges = set()
         for (l,m) in n.successors:
-            if m in mark: continue
-            if m.name != terminalname and len(m.successors) == 1:
-                mark.add(m)
+            if len(m.successors) == 1 and len(pred_map[m]) == 1:
                 (l2,m2) = m.successors.pop()
-                new_edges.add((concat(l,l2),m2))
+                if (n == m2):
+                    m.successors.add((l2,n))
+                else:
+                    mark.add(m)
+                    new_edges.add((concat(l,l2),m2))
+                    if m.name in specialnames:
+                        m2.name = m.name
+            elif m.name == terminalname and len(pred_map[m]) == 1 and l == epsilon:
+                mark.add(m)
+                n.name = terminalname
         n.successors.update(new_edges)
 
     for m in mark:
