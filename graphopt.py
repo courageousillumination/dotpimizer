@@ -117,9 +117,40 @@ def merge_epsilons(s):
 
     s.nodes.difference_update(rewrites.keys())
 
+
+def merge_single_path_nodes(s):
+    def concat(l1,l2):
+        s1 = ''
+        s2 = ''
+        if l1 != epsilon: s1 = l1
+        if l2 != epsilon: s2 = l2
+        return s1+s2
+
+    pred_map = get_pred_map(s)
+    mark = set()
+    for n in s.nodes:
+        new_edges = set()
+        for (l,m) in n.successors:
+            if m in mark: continue
+            if m.name != terminalname and len(m.successors) == 1:
+                mark.add(m)
+                (l2,m2) = m.successors.pop()
+                new_edges.add((concat(l,l2),m2))
+        n.successors.update(new_edges)
+
+    for m in mark:
+        preds = pred_map[m]
+        for n in preds:
+            mark_edges = set((l,m2) for (l,m2) in n.successors if m2 == m)
+            n.successors.difference_update(mark_edges)
+
+    s.nodes.difference_update(mark)
+
 def graph_optimize(graph):
     s = mk_simplegraph(graph)
     merge_epsilons(s)
+    merge_single_path_nodes(s)
+
     components = s.tarjan()
     g = mk_dotgraph(s)
     cluster_index = 0
