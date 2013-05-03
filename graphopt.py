@@ -51,35 +51,70 @@ def mk_dotgraph(s):
             g.add_edge(e)
     return g
 
-def rename_sf(s):
-    max_val = max(int(n.name) for n in s.nodes)
-    for n in s.nodes:
-        if int(n.name) == 0:
-            n.name = startname
-        elif int(n.name) == max_val:
-            n.name = terminalname
-
 def merge_epsilons(s):
     from regexgraph import epsilon as e
-    removed_nodes = set()
+    specialnames = (startname,terminalname)
+
+    predecessor_map = {}
     for n in s.nodes:
-        if n in removed_nodes: continue
+        for (l,m) in n.successors:
+            if m == n: continue
+            preds = None
+            if m in predecessor_map:
+                preds = predecessor_map[m]
+            else:
+                preds = set()
+                predecessor_map[m] = preds
+            preds.add(n)
+
+    rewrites = {}
+
+    for n in s.nodes:
         for m in s.nodes:
-            if n in removed_nodes or m in removed_nodes: continue
+            if n in rewrites or m in rewrites: continue
             if (e,n) in m.successors and (e,m) in n.successors:
-                n.successors.update(m.successors)
-                n.successors.discard((e,m))
-                if m in m.successors:
-                    n.successors.add((e,n))
-                removed_nodes.add(m)
-                if n.name == '0' or m.name == '0':
-                    n.name = '0'
-    s.nodes.difference_update(removed_nodes)
+                def swap_for_n(m2):
+                    if m2 == m:
+                        return n
+                    else:
+                        return m2
+
+                new_successors = set((l,swap_for_n(m2)) for (l,m2) in m.successors)
+                new_successors.update((l,swap_for_n(m2)) for (l,m2) in n.successors)
+
+                mark = set()
+                for (l,m2) in n.successors:
+                    if m2 == m:
+                        mark.add((l,m))
+                n.successors.difference_update(mark)
+                n.successors.update(new_successors)
+                n.successors.discard((e,n))
+
+                rewrites[m] = n
+                for p in rewrites:
+                    if rewrites[p] == m:
+                        rewrites[p] = n
+                if m.name in specialnames:
+                    n.name = m.name
+
+    for n in rewrites:
+        for m in predecessor_map[n]:
+            if m in rewrites: continue
+
+            new_successors = set()
+            for (l,n2) in m.successors:
+                if n2.name == n.name:
+                    new_successors.add((l,rewrites[n]))
+                else:
+                    new_successors.add((l,n2))
+            m.successors = new_successors
+
+    s.nodes.difference_update(rewrites.keys())
 
 def graph_optimize(graph):
     s = mk_simplegraph(graph)
+    merge_epsilons(s)
     components = s.tarjan()
-    rename_sf(s)
     g = mk_dotgraph(s)
     cluster_index = 0
     for c in components:
