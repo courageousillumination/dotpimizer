@@ -3,6 +3,7 @@ from regexgraph import epsilon
 
 startname = 's'
 terminalname = 't'
+specialnames = (startname,terminalname)
 
 def rename_sf(s):
     max_val = max(int(n.name) for n in s.nodes)
@@ -69,7 +70,6 @@ def get_pred_map(s):
 
 def merge_epsilons(s):
     e = epsilon
-    specialnames = (startname,terminalname)
 
     predecessor_map = get_pred_map(s)
 
