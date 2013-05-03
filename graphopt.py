@@ -17,22 +17,21 @@ def mk_simplegraph(g):
             ms = [x for x in node_map if (node_map[x].get_name() == m)]
             newm = ms[0]
             newn.successors.add((e.get_label(),newm))
-    return (s,node_map)
+    return s
 
 def mk_dotgraph(s):
     g = pydot.Dot(graph_type='digraph')
     nodemap = {}
     for n in s.nodes:
         newn = pydot.Node(n.name)
-        g.add(newn)
+        g.add_node(newn)
         nodemap[n] = newn
     for n in nodemap:
         newn = nodemap[n]
-        edges = set()
         for (l,m) in n.successors:
             e = pydot.Edge(n.name,m.name)
             e.set_label(l)
-            edges.add(e)
+            g.add_edge(e)
     return g
 
 def merge_epsilons(s):
@@ -53,13 +52,14 @@ def merge_epsilons(s):
     s.nodes.difference_update(removed_nodes)
 
 def graph_optimize(graph):
-    s,nodemap = mk_simplegraph(graph)
+    s = mk_simplegraph(graph)
     components = s.tarjan()
-    cluster_index = 0
-    for c in components:
-        cur = pydot.Cluster(str(cluster_index))
-        for n in c:
-            cur.add_node(nodemap[n])
-        graph.add_subgraph(cur)
-        cluster_index += 1
+    g = mk_dotgraph(s)
+#    cluster_index = 0
+#    for c in components:
+#        cur = pydot.Cluster(str(cluster_index))
+#        for n in c:
+#            cur.add_node(nodemap[n])
+#        graph.add_subgraph(cur)
+#        cluster_index += 1
     return graph
