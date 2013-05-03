@@ -116,6 +116,7 @@ def merge_epsilons(s):
             m.successors = new_successors
 
     s.nodes.difference_update(rewrites.keys())
+    return len(rewrites)
 
 
 def merge_single_path_nodes(s):
@@ -145,11 +146,14 @@ def merge_single_path_nodes(s):
             n.successors.difference_update(mark_edges)
 
     s.nodes.difference_update(mark)
+    return len(mark)
 
 def graph_optimize(graph):
     s = mk_simplegraph(graph)
-    merge_epsilons(s)
-    merge_single_path_nodes(s)
+    change = 1
+    while change > 0:
+        change = merge_epsilons(s)
+        change += merge_single_path_nodes(s)
 
     components = s.tarjan()
     g = mk_dotgraph(s)
