@@ -163,8 +163,8 @@ def merge_single_path_nodes(s):
     return len(mark)
 
 def graph_optimize(graph):
-    reps = [graph]
     s = mk_simplegraph(graph)
+    reps = [mk_dotgraph(s)]
     change = 1
     while change > 0:
         change = merge_epsilons(s)
