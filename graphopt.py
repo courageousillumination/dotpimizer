@@ -16,6 +16,7 @@ def rename_sf(s):
 
 def mk_simplegraph(g):
     s = sg.Graph()
+    edges = g.get_edges()
 
     node_map = {}
     for n in g.get_nodes():
@@ -24,13 +25,14 @@ def mk_simplegraph(g):
         node_map[newn] = n
     for newn in node_map:
         n = node_map[newn]
-        edges = g.get_edges()
-        edges = [e for e in edges if e.get_source() == n.get_name()]
-        for e in edges:
+        successor_edges = [e for e in edges if e.get_source() == n.get_name()]
+        for e in successor_edges:
             m = e.get_destination()
             ms = [x for x in node_map if (node_map[x].get_name() == m)]
             newm = ms[0]
-            newn.successors.add((e.get_label(),newm))
+            l = e.get_label()
+            if l == '': l = epsilon
+            newn.successors.add((l,newm))
 
     rename_sf(s)
     return s
