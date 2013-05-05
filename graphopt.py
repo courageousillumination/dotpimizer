@@ -81,15 +81,11 @@ def merge_epsilons(s):
     rewrites = {}
 
     for n in s.nodes:
+        if n.name in specialnames: continue
         for m in s.nodes:
             if n in rewrites or m in rewrites: continue
+            if m.name in specialnames: continue
             if (e,n) in m.successors and (e,m) in n.successors:
-                if m.name in specialnames:
-                    if n.name in specialnames:
-                        n.name = s_and_t
-                    else:
-                        n.name = m.name
-
                 def swap_for_n(m2):
                     if m2 == m:
                         return n
@@ -142,8 +138,10 @@ def merge_single_path_nodes(s):
     pred_map = get_pred_map(s)
     mark = set()
     for n in s.nodes:
+        if n.name in specialnames: continue
         new_edges = set()
         for (l,m) in n.successors:
+            if m.name in specialnames: continue
             if len(m.successors) == 1 and len(pred_map[m]) == 1:
                 (l2,m2) = m.successors.pop()
                 if n == m2:
@@ -151,19 +149,7 @@ def merge_single_path_nodes(s):
                 else:
                     mark.add(m)
                     new_edges.add((concat(l,l2),m2))
-                    if m.name in specialnames:
-                        if m2 in specialnames:
-                            m2.name = s_and_t
-                        else:
-                            m2.name = m.name
                     pred_map[m2].add(n)
-            elif m.name in specialnames and len(pred_map[m]) == 1 and l == epsilon:
-                mark.add(m)
-                new_edges.add((l,n))
-                if n.name in specialnames:
-                    n.name = s_and_t
-                else:
-                    n.name = m.name
         n.successors.update(new_edges)
         n.successors.discard((epsilon,n))
 
