@@ -40,6 +40,7 @@ def mk_simplegraph(g):
 def mk_dotgraph(s):
     g = pydot.Dot(graph_type='digraph')
     nodemap = {}
+    i = 1
     for n in s.nodes:
         newn = pydot.Node(n.name)
         if n.name == startname:
@@ -48,6 +49,9 @@ def mk_dotgraph(s):
             newn.set_label('Terminal')
         elif n.name == s_and_t:
             newn.set_label('Start/Terminal')
+        else:
+            newn.set_label('v'+str(i))
+            i += 1
         g.add_node(newn)
         nodemap[n] = newn
     for n in nodemap:
