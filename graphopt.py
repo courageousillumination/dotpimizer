@@ -62,7 +62,6 @@ def get_pred_map(s):
     predecessor_map = {}
     for n in s.nodes:
         for (l,m) in n.successors:
-            if m == n: continue
             preds = None
             if m in predecessor_map:
                 preds = predecessor_map[m]
@@ -132,18 +131,18 @@ def merge_single_path_nodes(s):
     pred_map = get_pred_map(s)
     mark = set()
     for n in s.nodes:
-        if n.name in specialnames: continue
         new_edges = set()
         for (l,m) in n.successors:
-            if m.name in specialnames: continue
-            if len(m.successors) == 1 and len(pred_map[m]) == 1:
-                (l2,m2) = m.successors.pop()
-                if n == m2:
-                    m.successors.add((l2,n))
-                else:
-                    mark.add(m)
-                    new_edges.add((concat(l,l2),m2))
-                    pred_map[m2].add(n)
+            if len(pred_map[m]) == 1:
+                if len(m.successors) == 1:
+                    (l2,m2) = m.successors.pop()
+                    if m2 == m:
+                        m.successors.add((l2,m))
+                    else:
+                        mark.add(m)
+                        new_edges.add((concat(l,l2),m2))
+                        pred_map[m2].add(n)
+                        m2.name = name_merge(m2,m)
         n.successors.update(new_edges)
         n.successors.discard((epsilon,n))
 
