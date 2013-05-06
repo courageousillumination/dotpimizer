@@ -70,40 +70,41 @@ def get_pred_map(s):
                 preds = set()
                 predecessor_map[m] = preds
             preds.add(n)
-
     return predecessor_map
+
+def name_merge(n,m):
+    if m.name in specialnames:
+        if n.name in specialnames:
+            return s_and_t
+        else:
+            return m.name
+    else:
+        return n.name
+
 
 def merge_epsilons(s):
     e = epsilon
-
     predecessor_map = get_pred_map(s)
-
     rewrites = {}
 
+    def apply_rewrite(m):
+        if m in rewrites:
+            return rewrites[m]
+        return m
+
     for n in s.nodes:
-        if n.name in specialnames: continue
+        if n in rewrites: continue
         for m in s.nodes:
-            if n in rewrites or m in rewrites: continue
-            if m.name in specialnames: continue
+            if m in rewrites: continue
             if (e,n) in m.successors and (e,m) in n.successors:
-                def swap_for_n(m2):
-                    if m2 == m:
-                        return n
-                    else:
-                        return m2
+                n.name = name_merge(n,m)
+                rewrites[m] = n
 
-                new_successors = set((l,swap_for_n(m2)) for (l,m2) in m.successors)
-                new_successors.update((l,swap_for_n(m2)) for (l,m2) in n.successors)
-
-                mark = set()
-                for (l,m2) in n.successors:
-                    if m2 == m:
-                        mark.add((l,m))
-                n.successors.difference_update(mark)
-                n.successors.update(new_successors)
+                new_successors = set((l,apply_rewrite(m2)) for (l,m2) in m.successors)
+                new_successors.update((l,apply_rewrite(m2)) for (l,m2) in n.successors)
+                n.successors = new_successors
                 n.successors.discard((e,n))
 
-                rewrites[m] = n
                 for p in rewrites:
                     if rewrites[p] == m:
                         rewrites[p] = n
@@ -111,14 +112,7 @@ def merge_epsilons(s):
     for n in rewrites:
         for m in predecessor_map[n]:
             if m in rewrites: continue
-
-            new_successors = set()
-            for (l,n2) in m.successors:
-                if n2.name == n.name:
-                    new_successors.add((l,rewrites[n]))
-                else:
-                    new_successors.add((l,n2))
-            m.successors = new_successors
+            m.successors = set((l,apply_rewrite(n2)) for (l,n2) in m.successors)
 
     s.nodes.difference_update(rewrites.keys())
     return len(rewrites)
