@@ -99,7 +99,7 @@ def merge_epsilons(s):
         if n in rewrites: continue
         for m in s.nodes:
             if m in rewrites: continue
-            if (e,n) in m.successors and (e,m) in n.successors:
+            if (e,m) in n.successors and ((e,n) in m.successors or len(m.successors) == 0):
                 n.name = name_merge(n,m)
                 rewrites[m] = n
 
@@ -146,7 +146,7 @@ def merge_single_path_nodes(s):
                         mark.add(m)
                         new_edges.add((concat(l,l2),m2))
                         pred_map[m2].add(n)
-                        m2.name = name_merge(m2,m)
+                        n.name = name_merge(n,m)
         n.successors.update(new_edges)
         n.successors.discard((epsilon,n))
 
